@@ -98,10 +98,6 @@ public class ApacheCommonsConfigTest {
         assertThat(value,is(equalTo(extractedValue)));
     }
 
-    @Test
-    public void writeToAPropertyFileWithAbsouletePath() {
-        fail("not implemented yet");
-    }
 
     @Test
     public void readSeveralPropertiesFromAPropertiesFile() {
@@ -111,8 +107,46 @@ public class ApacheCommonsConfigTest {
 
 
     @Test
-    public void writeSeveralPropertyToPropertyFile() {
-        fail("not implemented yet");
+    public void writeSeveralPropertyToPropertyFile() throws ConfigurationException, IOException {
+        String basePath = "src/test/resources/";
+        String fileName = "write-several.properties";
+
+        String fullPath = basePath+fileName;
+        String key1 = "sampleKey1";
+        String key2 = "sampleKey2";
+        String key3 = "sampleKey3";
+        String value1 = "sampleValue1";
+        String value2 = "sampleValue2";
+        String value3 = "sampleValue3";
+        File file = new File(fullPath);
+        if(file.exists() && file.isFile()){
+            file.delete();
+        }
+        file.createNewFile();
+        Parameters params = new Parameters();
+        FileBasedConfigurationBuilder<FileBasedConfiguration> builder =
+                new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfiguration.class)
+                        .configure(params.properties()
+                                .setFileName(fileName)
+                                .setBasePath(basePath)
+                                .setListDelimiterHandler(new DefaultListDelimiterHandler(','))
+                        );
+        Configuration config = builder.getConfiguration();
+
+
+        config.setProperty(key1, value1);
+        config.setProperty(key2, value2);
+        config.setProperty(key3, value3);
+        builder.save();
+
+        String extractedValue1 = Utils.readPropertyFromFile(key1, fullPath);
+        assertThat(value1,is(equalTo(extractedValue1)));
+
+        String extractedValue2 = Utils.readPropertyFromFile(key2, fullPath);
+        assertThat(value2,is(equalTo(extractedValue2)));
+
+        String extractedValue3 = Utils.readPropertyFromFile(key3, fullPath);
+        assertThat(value3,is(equalTo(extractedValue3)));
     }
 
     @Test
