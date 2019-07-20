@@ -13,6 +13,9 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -100,8 +103,30 @@ public class ApacheCommonsConfigTest {
 
 
     @Test
-    public void readSeveralPropertiesFromAPropertiesFile() {
-        fail("not implemented yet");
+    public void readSeveralPropertiesFromAPropertiesFile() throws ConfigurationException {
+        String basePath = "src/test/resources/";
+        String fileName = "read-several.properties";
+        Parameters params = new Parameters();
+        FileBasedConfigurationBuilder<FileBasedConfiguration> builder =
+                new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfiguration.class)
+                        .configure(params.properties()
+                                .setFileName(fileName)
+                                .setBasePath(basePath)
+                                .setListDelimiterHandler(new DefaultListDelimiterHandler(','))
+                        );
+        Configuration config = builder.getConfiguration();
+
+        Iterator<String> keyIterator = config.getKeys();
+        Map<String, String> props = new HashMap<>();
+        while (keyIterator.hasNext()){
+            String key = keyIterator.next();
+            String value = config.getString(key);
+            props.put(key,value);
+        }
+
+        System.out.println("props = " + props);
+        long numOfReadProps = props.keySet().stream().count();
+        assertThat(4L,is(equalTo(numOfReadProps)));
     }
 
 
@@ -150,8 +175,24 @@ public class ApacheCommonsConfigTest {
     }
 
     @Test
-    public void appendSeveralPropertyToAPropertyFile() {
-        fail("not implemented yet");
+    public void appendSeveralPropertyToAPropertyFile() throws ConfigurationException {
+        String basePath = "src/test/resources/";
+        String fileName = "file-to-append.properties";
+        String fullPath = basePath+fileName;
+
+        Parameters params = new Parameters();
+        FileBasedConfigurationBuilder<FileBasedConfiguration> builder =
+                new FileBasedConfigurationBuilder<FileBasedConfiguration>(PropertiesConfiguration.class)
+                        .configure(params.properties()
+                                .setFileName(fileName)
+                                .setBasePath(basePath)
+                                .setListDelimiterHandler(new DefaultListDelimiterHandler(','))
+                        );
+        Configuration config = builder.getConfiguration();
+        config.setProperty("appendedKey1", "appendedValue1");
+        config.setProperty("appendedKey2", "appendedValue2");
+        config.setProperty("appendedKey3", "appendedValue3");
+        builder.save();
     }
 
 }
